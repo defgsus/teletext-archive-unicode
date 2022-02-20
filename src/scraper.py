@@ -115,6 +115,7 @@ class Scraper:
                 if content is True:
                     page = self.previous_pages.get_page(page_num, sub_page_num)
                     report["unchanged"] += 1
+                    self.log(f"no change in {page_num}/{sub_page_num}")
 
                 else:
                     timestamp = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
@@ -141,6 +142,7 @@ class Scraper:
                         if self.compare_pages(previous_page, page):
                             page = previous_page
                             report["unchanged"] += 1
+                            self.log(f"no change in {page_num}/{sub_page_num}")
                         else:
                             report["changed"] += 1
                     else:

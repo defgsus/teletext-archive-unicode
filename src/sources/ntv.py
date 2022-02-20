@@ -34,18 +34,13 @@ class NTV(Scraper):
             # get next page
             url = f"https://teletext.n-tv.de/teletext-api/ascend/{page_index}"
 
-    def _is_page_different(self, page_index: int, sub_page_index: int, new_data: dict) -> bool:
-        filename = self.to_filename(page_index, sub_page_index)
-        if not filename.exists():
-            return True
-
-        old_data = json.loads(filename.read_text())
-
-        # see if something else than the date has changed
-        old_data["date"] = new_data["date"]
-        old_data["content"]["date"] = new_data["content"]["date"]
-
-        return old_data != new_data
+    def compare_pages(self, old: TeletextPage, new: TeletextPage) -> bool:
+        if len(old.lines) != len(new.lines):
+            return False
+        if len(old.lines) < 1:
+            return False
+        # compare pages without the first line which includes the current date and time
+        return old.lines[1:] == new.lines[1:]
 
     def to_teletext(self, content: dict) -> TeletextPage:
         matrix = []
