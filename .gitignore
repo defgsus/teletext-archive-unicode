@@ -1,0 +1,16 @@
+env/
+venv/
+scratchpad/
+
+.idea/
+*.iml
+
+*.pyc
+__pycache__/
+
+yarn.lock
+yarn*.log
+package-lock.json
+frontend/dist/
+frontend/.parcel-cache
+node_modules/
