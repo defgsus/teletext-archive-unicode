@@ -14,7 +14,7 @@ class ARD(Scraper):
         "bl": "l"
     }
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, Any], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, Any], None, None]:
         page_index = 100
         while page_index < 900:
             response = self.get_html(self._get_url(page_index, 1), allow_redirects=False)

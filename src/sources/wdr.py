@@ -21,7 +21,7 @@ class WDR(Scraper):
         "white": "w",
     }
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, bs4.Tag], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, bs4.Tag], None, None]:
         soup = self.get_soup("https://www1.wdr.de/wdrtext/index.html")
 
         for sub_index, content in self._iter_sub_pages(soup.find("div", {"id": "wdrtext_inner"})):

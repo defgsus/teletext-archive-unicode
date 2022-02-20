@@ -1,6 +1,9 @@
 import re
 import json
+import datetime
 from typing import Dict, Generator, Tuple, Union
+
+import pytz
 
 from ..scraper import Scraper
 from ..teletext import Teletext, TeletextPage
@@ -28,7 +31,9 @@ class ZDFBase(Scraper):
         "Ã": "Ö",
     }
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, Union[str, bool]], None, None]:
+    TIMEZONE = pytz.timezone("Europe/Berlin")
+
+    def iter_pages(self) -> Generator[Tuple[int, int, Union[str, bool]], None, None]:
         for page_index in range(100, 900):
 
             url = f"https://teletext.zdf.de/php/options.php?mandant={self.ZDF_MANDANT}&site={page_index}"
@@ -36,32 +41,24 @@ class ZDFBase(Scraper):
 
             num_sub_pages, date = response.text.split(",")
             num_sub_pages = int(num_sub_pages) + 1
-
-            page_status = {"date": date, "sub_pages": num_sub_pages}
             is_empty_page = date == "-1"
-
-            # keep the files that don't have changed (according to published timestamp)
-            #   and avoid downloading them because the pages include the current time
-            previous_page = previous_pages.get_page(page_index)
-            if previous_page:
-                all_exist = False
-                if not is_empty_page:
-                    all_exist = all(
-                        self.to_filename(page_index, sub_page_index + 1).exists()
-                        for sub_page_index in range(num_sub_pages)
-                    )
-                    if all_exist:
-                        for sub_page_index in range(num_sub_pages):
-                            yield page_index, sub_page_index + 1, True
-                if all_exist:
-                    continue
-
-            status[str(page_index)] = page_status
 
             if is_empty_page:
                 continue
 
+            date = datetime.datetime.strptime(date[:19], "%Y-%m-%dT%H:%M:%S")
+            date = self.TIMEZONE.localize(date).astimezone(pytz.utc).isoformat()
+
             for sub_page_index in range(num_sub_pages):
+
+                # keep the pages that don't have changed (according to published timestamp)
+                #   and avoid downloading them because the pages include the current time
+                previous_page = self.previous_pages.get_page(page_index, sub_page_index + 1)
+                if previous_page:
+                    if date <= previous_page.timestamp:
+                        yield page_index, sub_page_index + 1, True
+                        continue
+
                 page_name = f"{page_index}"
                 if sub_page_index:
                     page_name = f"{page_name}_{sub_page_index}"
@@ -73,10 +70,11 @@ class ZDFBase(Scraper):
                     text = response.content.decode("utf-8")
                     yield page_index, sub_page_index + 1, text
 
-        self.log("writing", status_filename)
-        status_filename.write_text(json.dumps(status, indent=2))
-
     def to_teletext(self, content: str) -> TeletextPage:
+        # if content.startswith("KEEP-ORIGINAL"):
+
+
+
         for wrong, correct in self.ENCODING_FIX_MAPPING.items():
             content = content.replace(wrong, correct)
 

@@ -13,7 +13,7 @@ class FakeScraper(Scraper):
         super().__init__()
         self._page_content = page_content
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, Union[str, bool]], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, Union[str, bool]], None, None]:
         for (page_index, sub_page_index), content in self._page_content.items():
             yield page_index, sub_page_index, content
 

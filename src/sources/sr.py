@@ -11,7 +11,7 @@ class SR(Scraper):
 
     NAME = "sr"
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, bs4.BeautifulSoup], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, bs4.BeautifulSoup], None, None]:
 
         page_index = 100
         sub_page_index = 1

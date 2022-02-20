@@ -24,7 +24,7 @@ class NDR(Scraper):
         "7": "w",
     }
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, str], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, str], None, None]:
         for page_index, num_sub_pages in self._get_pages().items():
             for sub_page_index in range(num_sub_pages):
                 url = f"https://www.ndr.de/public/teletext/{page_index}_{sub_page_index+1:02}.htm"

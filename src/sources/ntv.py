@@ -10,7 +10,7 @@ class NTV(Scraper):
     NAME = "ntv"
     FILE_EXTENSION = "json"
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, dict], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, dict], None, None]:
         url = f"https://teletext.n-tv.de/teletext-api/100/0"
 
         page_index = 0

@@ -38,6 +38,7 @@ class Scraper:
     def __init__(self, verbose: bool = False, raise_errors: bool = False):
         self.verbose = verbose
         self.do_raise_errors = raise_errors
+        self.previous_pages = Teletext()
         self.session = requests.Session()
         self.session.headers = {
             "User-Agent": "github.com/defgsus/teletext-archive-unicode"
@@ -51,14 +52,17 @@ class Scraper:
     def filename(cls) -> Path:
         return cls.path() / f"{cls.NAME}.ndjson"
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, Any], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, Any], None, None]:
         """
         Yield tuples of (page-number, sub-page-number, content)
 
+        Page-number starts at 100, sub-page number starts at 1
+
         Content should be the thing that is handled by .to_teletext()
 
-        - page-number starts with 100
-        - sub-page number starts with 1
+        One special case is content == True, in which case the previous page
+        will be reused. You should be sure, however, that the
+        page-number/sub-page-number is in fact in self.previous_pages!
         """
         raise NotImplementedError
 
@@ -72,12 +76,22 @@ class Scraper:
         """
         return old == new
 
+    def load_previous_pages(self):
+        self.previous_pages = Teletext()
+        if self.filename().exists():
+            try:
+                self.previous_pages = Teletext.from_ndjson(self.filename())
+            except Exception as e:
+                self.log(f"{type(e).__class__}: {e}")
+                pass
+
     def download(self) -> dict:
         """
         Download all pages via `iter_pages` and store to disk
 
         Returns a small report dict.
         """
+        self.load_previous_pages()
         report = {
             "unchanged": 0,
             "changed": 0,
@@ -85,13 +99,6 @@ class Scraper:
             "removed": 0,
             "errors": 0,
         }
-        previous_pages = Teletext()
-        if self.filename().exists():
-            try:
-                previous_pages = Teletext.from_ndjson(self.filename())
-            except Exception as e:
-                self.log(f"{type(e).__class__}: {e}")
-                pass
         retrieved_set = set()
 
         self.log("writing", self.filename())
@@ -102,41 +109,46 @@ class Scraper:
             }
             print(json.dumps(header, ensure_ascii=False, separators=(',', ':')), file=fp)
 
-            for page_num, sub_page_num, content in self.iter_pages(previous_pages=previous_pages):
-                timestamp = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+            for page_num, sub_page_num, content in self.iter_pages():
                 retrieved_set.add((page_num, sub_page_num))
 
-                try:
-                    page = self.to_teletext(content)
-                except Exception as e:
-                    if self.do_raise_errors:
-                        raise
-                    self.log(f"CONVERSION ERROR: {type(e).__name__}: {e}")
-                    page = TeletextPage()
-                    page.error = f"{type(e).__name__}: {e}"
-                    report["errors"] += 1
+                if content is True:
+                    page = self.previous_pages.get_page(page_num, sub_page_num)
+                    report["unchanged"] += 1
 
-                page.index = page_num
-                page.sub_index = sub_page_num
-                page.timestamp = timestamp
-
-                previous_page = previous_pages.get_page(page_num, sub_page_num)
-                if previous_page:
-                    # if nothing changed (according to scraper's comparison)
-                    #   write the previous page with it's timestamp and everything
-                    #   to minimize commit changes
-                    if self.compare_pages(previous_page, page):
-                        page = previous_page
-                        report["unchanged"] += 1
-                    else:
-                        report["changed"] += 1
                 else:
-                    report["added"] += 1
+                    timestamp = datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+
+                    try:
+                        page = self.to_teletext(content)
+                    except Exception as e:
+                        if self.do_raise_errors:
+                            raise
+                        self.log(f"CONVERSION ERROR: {type(e).__name__}: {e}")
+                        page = TeletextPage()
+                        page.error = f"{type(e).__name__}: {e}"
+                        report["errors"] += 1
+
+                    page.index = page_num
+                    page.sub_index = sub_page_num
+                    page.timestamp = timestamp
+
+                    previous_page = self.previous_pages.get_page(page_num, sub_page_num)
+                    if previous_page:
+                        # if nothing changed (according to scraper's comparison)
+                        #   write the previous page with it's timestamp and everything
+                        #   to minimize commit changes
+                        if self.compare_pages(previous_page, page):
+                            page = previous_page
+                            report["unchanged"] += 1
+                        else:
+                            report["changed"] += 1
+                    else:
+                        report["added"] += 1
 
                 page.to_ndjson(file=fp)
 
-        if previous_pages:
-            report["removed"] = len(set(previous_pages.page_index) - retrieved_set)
+        report["removed"] = len(set(self.previous_pages.page_index) - retrieved_set)
 
         return report
 

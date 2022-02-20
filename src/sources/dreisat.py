@@ -35,7 +35,7 @@ class DreiSAT(Scraper):
         "pos": re.compile(r".*background-position:\s*(-?\d+)px\s+(-?\d+)px"),
     }
 
-    def iter_pages(self, previous_pages: Teletext) -> Generator[Tuple[int, int, Any], None, None]:
+    def iter_pages(self) -> Generator[Tuple[int, int, Any], None, None]:
         page_index = 100
         sub_page_index = 1
 
