@@ -93,10 +93,10 @@ class Scraper:
         """
         self.load_previous_pages()
         report = {
-            "unchanged": 0,
             "changed": 0,
             "added": 0,
             "removed": 0,
+            "unchanged": 0,
             "errors": 0,
         }
         retrieved_set = set()
