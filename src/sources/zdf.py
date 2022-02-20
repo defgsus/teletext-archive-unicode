@@ -71,10 +71,7 @@ class ZDFBase(Scraper):
                     yield page_index, sub_page_index + 1, text
 
     def to_teletext(self, content: str) -> TeletextPage:
-        # if content.startswith("KEEP-ORIGINAL"):
-
-
-
+        # fix older encoding errors
         for wrong, correct in self.ENCODING_FIX_MAPPING.items():
             content = content.replace(wrong, correct)
 

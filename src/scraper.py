@@ -145,8 +145,10 @@ class Scraper:
                             self.log(f"no change in {page_num}/{sub_page_num}")
                         else:
                             report["changed"] += 1
+                            self.log(f"{page_num}/{sub_page_num} has changed")
                     else:
                         report["added"] += 1
+                        self.log(f"{page_num}/{sub_page_num} is new")
 
                 page.to_ndjson(file=fp)
 

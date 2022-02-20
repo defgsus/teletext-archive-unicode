@@ -129,6 +129,9 @@ class TeletextPage:
             if len(block[0]) > 2:
                 kwargs["char_set"] = int(block[0][2])
 
+            if len(block) > 2:
+                kwargs["link"] = block[1]
+
             return cls(**kwargs)
 
     def __init__(self):
@@ -138,8 +141,14 @@ class TeletextPage:
         self.timestamp = None
         self.error = None
 
+    def __str__(self):
+        return f"{self.index}/{self.sub_index}({len(self.lines)} lines)"
+
     def __eq__(self, other) -> bool:
-        """Only compares the content!"""
+        """
+        Only compares the content,
+        not the timestamp or index
+        """
         if not isinstance(other, TeletextPage):
             return False
         return self.lines == other.lines
