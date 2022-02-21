@@ -106,8 +106,8 @@ Oh boy, look what else exists on the web:
 - there is at least one other character set with thinner box graphics. 
   it's not supported by unicode but it would be good to store 
   at least the charset switch
-- unrecognized chars on **ntv 218**
-
+- unrecognized chars on **NTV 218**
+- ZDF scraper report in commit message only shows *pages added*
 
 ## TODO other sites
     
