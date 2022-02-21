@@ -1,0 +1,33 @@
+name: Scraper
+on:
+  schedule:
+    - cron: '0 */8 * * *'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          cache: 'pip'
+      - name: pip install
+        run: |
+          pip install -r requirements.txt
+      - name: scraper
+        run: |
+          python update.py -j 10 > commit-message.md
+          cat commit-message.md
+      - name: git config user
+        run: |
+          curl -s -u ${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }} https://api.github.com/users/${GITHUB_ACTOR} > ${GITHUB_ACTOR}.json
+          git config user.email "$(cat ${GITHUB_ACTOR}.json | jq -r .email)"
+          git config user.name "scrapy"
+      - name: commit changes
+        run: |
+          git add docs/snapshots/
+          git commit --file=commit-message.md --allow-empty
+      - name: push changes
+        run: |
+          git push || (git pull --rebase --no-edit && git push)

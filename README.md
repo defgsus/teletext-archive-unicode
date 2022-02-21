@@ -2,19 +2,13 @@
 
 Or *videotext*, as we used to call it. 
 
-[![Scraper](https://github.com/defgsus/teletext-archive/actions/workflows/scraper.yml/badge.svg)](https://github.com/defgsus/teletext-archive/actions/workflows/scraper.yml)
+[![Scraper](https://github.com/defgsus/teletext-archive-unicode/actions/workflows/scraper.yml/badge.svg)](https://github.com/defgsus/teletext-archive/actions/workflows/scraper.yml)
 
-This repo exists mainly because it's just possible to scrape those
-online teletexts with github actions. And, you know, interesting
-stuff might evolve from historic beholding.
+This repo uses github actions to scrape teletext pages from 
+web sources and convert the html into easy digestible json/unicode files. 
 
-The data is collected raw in [docs/snapshots](docs/snapshots). Each commit
-adds, overwrites or removes the individual files of each teletext page.
-
-### TODO
-
-- comparison with previous
-- unrecognized chars on **ntv 218**
+The data is stored in [docs/snapshots](docs/snapshots) in a new-line 
+delimited json file for each station. 
 
 
 ### scraped stations:
@@ -32,6 +26,70 @@ adds, overwrites or removes the individual files of each teletext page.
 | ✔ [ZDFneo](docs/snapshots/zdf-neo)    | 2022-01-27 | html | https://teletext.zdf.de/teletext/zdfneo/
 
 
+### format
+
+The files contain one json object in each line. 
+Each file starts with a simple line like this:
+```json
+{"scraper":"3sat","timestamp":"2022-02-05T04:09:36"}
+```
+
+Then each page starts like this:
+```json
+{"page":100,"sub_page":1,"timestamp":"2022-02-05T04:09:36"}
+```
+
+and is followed by lines of content like this
+```json
+[["wb","  "],["rb","🬦🬚🬋🬋🬩🬚🬹 "],["bb","🬞🬭🬏 🬭🬭 🬻🬭                     "]]
+[["wb","  "],["rb","▐█🬱🬵🬆🬵█ "],["bb","█🬒🬎🬉🬆🬨▌█🬂 "],["rb","                    "]]
+[["wb","  "],["rb","▐█🬝🬟🬜██ "],["bb","🬁🬬🬱🬞🬜🬬▌█  "],["rb","                    "]]
+[["wb","  "],["rb","▐█🬬█🬱🬁█ "],["bb","🬬🬹🬝🬉🬺🬜▌🬬🬜 "],["rb","                    "]]
+[["wb","  "],["rb","▐🬲🬁🬎🬎🬞█                               "]]
+[["wb","  "],["rb","🬉🬎🬌🬋🬋🬎🬎                               "]]
+[["wb","  "],["rb","🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂🬂 "]]
+[["wb","  "],["rb","502 "],["bb","Köln will Benin-Bronzen           "]]
+[["wb","  "],["rb","    "],["bb","zurückgeben                       "]]
+[["wb","  "],["rb","401 "],["bb","Wetterwerte und Prognosen         "]]
+[["wb","  "],["rb","525 "],["bb","Theater und Konzerte Österreich   "]]
+[["wb","  "],["rb","555 "],["bb","Buchtipps und Literatur           "]]
+[["wb","  "],["rb","🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭🬭 "]]
+[["wb","    "],["rb","Jetzt in 3sat                       "]]
+[["wb","  "],["rb","  "],["wb","04:39 Kurzstrecke mit Pierre M.     "]]
+[["wb","  "],["rb","        "],["wb","Krause ................. 343  "]]
+[["wb","  "],["rb","  "],["wb","05:01 Kurzstrecke mit Pierre M.     "]]
+[["wb","  "],["rb","        "],["wb","Krause ................. 344  "]]
+[["wb","                                        "]]
+[["wb","  "],["rb","🬋🬋🬋 "],["bb","Nachrichten     200 Sport         "]]
+[["wb","  "],["bb","112 Deutschland     300 Programm      "]]
+[["wb","  "],["bb","150 Österreich      400 Wetter/Verkehr"]]
+[["wb","  "],["bb","151 Schweiz         500 Kultur        "]]
+[["wb","                                        "]]
+[["wb","                                        "]]
+```
+
+Each content line consists of one or several blocks with color and text.
+The two-letter color code represents foreground and background colors
+(**b**lack, **r**ed, **g**reen, b**l**ue, **m**agenta, **c**yan, **w**hite).
+
+A third argument might be in one block which would then be a link to another table:
+```json
+[["wb", 101, "Seite 101"]
+[["wb", [101, 5], "Seite 101/5"]
+```
+
+If you can see the graphic blocks in the above example you have a font 
+installed that supports the unicode
+[symbols for legacy computing](https://en.wikipedia.org/wiki/Symbols_for_Legacy_Computing)
+starting at `0x1bf00`. If not, you can install a font like 
+[unscii](http://viznut.fi/unscii/).
+
+The original character codes from the teletext pages are converted to 
+the unicode mappings via 
+[these tables](https://en.wikipedia.org/wiki/Teletext_character_set#Graphics_character_sets).
+
+
+
 ### related stuff
 
 Oh boy, look what else exists on the web: 
@@ -44,6 +102,14 @@ Oh boy, look what else exists on the web:
 
 
 ## TODO
+
+- there is at least one other character set with thinner box graphics. 
+  it's not supported by unicode but it would be good to store 
+  at least the charset switch
+- unrecognized chars on **ntv 218**
+
+
+## TODO other sites
     
 - **SWR** https://www.swrfernsehen.de/videotext/index.html
 
