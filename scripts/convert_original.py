@@ -1,15 +1,19 @@
 """
 Script for converting the original defgsus/teletext-archive commits
-to new format and commit in new repository
+to new format and re-commit each commit in new repository
+
+Be careful because this commits into the current repo!!!
 """
 import os
 import json
 from pathlib import Path
 from typing import List, Dict, Tuple, Callable, Any
+import subprocess
 
 import pytz
 from tqdm import tqdm
 
+from src.teletext import TeletextPage
 from src.scraper import Scraper, scraper_classes
 import src.sources
 from src.giterator import Giterator
@@ -20,9 +24,17 @@ def main():
         Path(__file__).resolve().parent.parent.parent / "teletext-archive"
     )
 
-    for commit in tqdm(git.iter_commits("docs/snapshots"), desc="commits", total=git.num_commits()):
-
-        timestamp = commit.author_date.astimezone(pytz.utc).replace(tzinfo=None).isoformat()
+    last_timestamp = None
+    for commit in tqdm(
+            git.iter_commits("docs/snapshots", parse_changes=False),
+            desc="commits", total=git.num_commits()
+    ):
+        timestamp = commit.author_date.astimezone(pytz.utc).replace(tzinfo=None)
+        if last_timestamp and (timestamp - last_timestamp).total_seconds() < 60*60 * 8:
+            continue
+        last_timestamp = timestamp
+        timestamp = timestamp.isoformat()
+        print("commit", timestamp, commit.hash)
 
         scraper_file_dict: Dict[str, Dict[Tuple[int, int], bytes]] = {}
         for file in commit.iter_files(["docs/snapshots"]):
@@ -58,7 +70,14 @@ def main():
                         key_name = "had errors"
                     commit_msg += f"- {value} pages {key_name}\n"
 
-        print(commit_msg)
+        commit_snapshots(commit_msg)
+
+
+def commit_snapshots(msg: str):
+    print(msg)
+    Path("/tmp/_tta-commit-message.md").write_text(msg)
+    subprocess.call(["git", "add", "docs/snapshots"])
+    subprocess.call(["git", "commit", "--file=/tmp/_tta-commit-message.md", "--allow-empty"])
 
 
 def render_teletext(
@@ -93,7 +112,13 @@ def render_teletext(
 
             content = scraper.legacy_bytes_to_content(binary_content)
 
-            page = scraper.to_teletext(content)
+            try:
+                page = scraper.to_teletext(content)
+            except Exception as e:
+                scraper.log(f"CONVERSION ERROR: {type(e).__name__}: {e}")
+                page = TeletextPage()
+                page.error = f"{type(e).__name__}: {e}"
+                report["errors"] += 1
             page.index = page_num
             page.sub_index = sub_page_num
             page.timestamp = timestamp

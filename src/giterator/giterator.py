@@ -80,6 +80,7 @@ class Giterator:
             reverse: bool = False,
             offset: int = 0,
             count: int = 0,
+            parse_changes: bool = True,
     ) -> Generator[Commit, None, None]:
         """
         Yields a dictionary for every git log that is found
@@ -101,7 +102,13 @@ class Giterator:
         """
         git_cmd = [
             "git", "log",
-            "--numstat", "--summary",
+        ]
+        if parse_changes:
+            git_cmd += [
+                "--numstat",
+                "--summary",
+            ]
+        git_cmd += [
             f"--pretty={self.DELIMITER1}%n"
                 f"{'%n'.join(i[0] for i in self.LOG_INFOS)}"
                 f"%n%B{self.DELIMITER2}",
