@@ -90,3 +90,6 @@ class ARD(Scraper):
         except ValueError:
             return "?"
 
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return cls.to_soup(content.decode("utf-8"))

@@ -1,4 +1,4 @@
-from typing import Dict, Generator, Tuple, Union, Optional
+from typing import Dict, Generator, Tuple, Union, Optional, Any
 
 import bs4
 
@@ -105,3 +105,7 @@ class WDR(Scraper):
                     tt.add_block(block)
 
         return tt
+
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return cls.to_soup(content.decode("utf-8"))

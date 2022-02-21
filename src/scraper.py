@@ -180,3 +180,7 @@ class Scraper:
     @classmethod
     def to_soup(cls, markup: str) -> bs4.BeautifulSoup:
         return bs4.BeautifulSoup(markup, features="html.parser")
+
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return content.decode("utf-8")

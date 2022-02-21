@@ -117,3 +117,7 @@ class DreiSAT(Scraper):
         #    print(" ".join(f"{c:2x}" for c in row))
 
         return TeletextPage.from_matrix(matrix)
+
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return cls.to_soup(content.decode("utf-8"))

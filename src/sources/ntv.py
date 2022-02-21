@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Generator, Tuple, Union, Optional
+from typing import Dict, Generator, Tuple, Union, Optional, Any
 
 from ..scraper import Scraper
 from ..teletext import Teletext, TeletextPage
@@ -60,3 +60,7 @@ class NTV(Scraper):
             matrix.append(matrix_row)
 
         return TeletextPage.from_matrix(matrix)
+
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return json.loads(content.decode("utf-8"))

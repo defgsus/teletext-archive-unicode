@@ -70,6 +70,14 @@ class ZDFBase(Scraper):
                     text = response.content.decode("utf-8")
                     yield page_index, sub_page_index + 1, text
 
+    def compare_pages(self, old: TeletextPage, new: TeletextPage) -> bool:
+        if len(old.lines) != len(new.lines):
+            return False
+        if len(old.lines) < 1:
+            return False
+        # compare pages without the first line which includes the current date and time
+        return old.lines[1:] == new.lines[1:]
+
     def to_teletext(self, content: str) -> TeletextPage:
         # fix older encoding errors
         for wrong, correct in self.ENCODING_FIX_MAPPING.items():

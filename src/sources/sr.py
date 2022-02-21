@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Generator, Tuple, Union, Optional
+from typing import Dict, Generator, Tuple, Union, Optional, Any
 
 import bs4
 
@@ -63,3 +63,7 @@ class SR(Scraper):
                 self.log(f"unhandled element {elem}")
 
         return tt
+
+    @classmethod
+    def legacy_bytes_to_content(cls, content: bytes) -> Any:
+        return cls.to_soup(content.decode("utf-8"))
