@@ -37,7 +37,7 @@ def main():
         print("commit", timestamp, commit.hash)
 
         scraper_file_dict: Dict[str, Dict[Tuple[int, int], bytes]] = {}
-        for file in commit.iter_files(["docs/snapshots"]):
+        for file in commit.iter_files("docs/snapshots"):
             scraper_name, file_name = file.name.split("/")[-2:]
             if file_name == "status.json":
                 continue

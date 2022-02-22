@@ -48,11 +48,19 @@ class Giterator:
         if self.verbose:
             print(*args, file=sys.stderr)
 
-    def num_commits(self) -> int:
+    def num_commits(self, *filenames: str, all: bool = False) -> int:
         if self._num_commits is None:
             args = ["git", "rev-list", "--count"] + self._git_args
-            if "--all" not in self._git_args:
-                args.append("--all")
+            if all:
+                if "--all" not in self._git_args:
+                    args.append("--all")
+            else:
+                if "--branches" not in self._git_args:
+                    args.append("--branches")
+
+            if filenames:
+                args += ["--"] + list(filenames)
+
             self._log(" ".join(args))
             output = subprocess.check_output(args, cwd=self.path)
             self._num_commits = int(output)
@@ -221,6 +229,8 @@ class Giterator:
 
     def iter_commit_hashes(self, offset: int = 0, count: int = 0) -> Generator[dict, None, None]:
         """
+        Yield **ALL** commit hashes of the repository
+
         :param offset: int
             Skip these number of commits before yielding.
 
@@ -228,13 +238,20 @@ class Giterator:
             If > 0 then stop after this number of commits.
 
         :return: generator of dict
+            {
+                "date": datetime,
+                "hash": str,
+                "tree_hash": str,
+                "children_hash": [str],
+                "parent_hash": [str],
+            }
         """
         git_cmd = [
             "git", "rev-list",
             "--children",
             "--all", "--reverse",
             "--topo-order",
-            f"--pretty=%T %P"
+            f"--pretty=%aI %T %P"
         ]
 
         self._log(" ".join(git_cmd))
@@ -258,8 +275,9 @@ class Giterator:
                     commit["hash"] = line[1]
                     commit["children_hash"] = line[2:]
                 else:
-                    commit["tree_hash"] = line[0]
-                    commit["parent_hash"] = line[1:]
+                    commit["date"] = parse_datetime(line[0])
+                    commit["tree_hash"] = line[1]
+                    commit["parent_hash"] = line[2:]
                     yield commit
                     cur_count += 1
                     commit = dict()

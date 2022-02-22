@@ -68,12 +68,12 @@ class Commit:
             "changes": self.changes,
         }
 
-    def iter_files(self, filenames: Optional[List[str]] = None) -> Generator[File, None, None]:
+    def iter_files(self, *filenames: str) -> Generator[File, None, None]:
         """
         Iterate through **all** or specific files in the repo at the state of this commit
         :return: generator of File
         """
-        yield from self.repo.iter_files(self.hash, filenames=filenames)
+        yield from self.repo.iter_files(self.hash, filenames=list(filenames))
 
     def iter_commit_files(self) -> Generator[File, None, None]:
         """
@@ -91,7 +91,7 @@ class Commit:
                     filenames.append(ch["name"])
 
             if filenames:
-                yield from self.iter_files(filenames=filenames)
+                yield from self.iter_files(*filenames)
 
     def dump(self, file: TextIO = None):
         commit = self

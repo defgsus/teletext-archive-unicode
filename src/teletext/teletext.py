@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Optional, TextIO, Tuple, Union
+from typing import List, Optional, TextIO, Tuple, Union, IO
 
 from .page import TeletextPage
 
@@ -11,21 +11,49 @@ class Teletext:
         self.pages = {}
         self.page_index = []
         self.timestamp = None
-        
+        self.channel = None
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.timestamp}, {self.channel}, {len(self.pages)})"
+
     @classmethod
-    def from_ndjson(cls, filename: Union[str, Path]) -> "Teletext":
+    def from_ndjson(cls, file: Union[str, Path, IO, List[str], bytes]) -> "Teletext":
+        if isinstance(file, (str, Path)):
+            lines = Path(file).read_text().strip().splitlines()
+        elif isinstance(file, list):
+            lines = file
+        elif isinstance(file, bytes):
+            lines = file.decode().splitlines()
+        else:
+            content = file.read()
+            if isinstance(content, bytes):
+                content = content.decode()
+            lines = content.splitlines()
+
         tt = cls()
-        lines = Path(filename).read_text().strip().splitlines()
-        
+
         cur_page = None
-        for line in lines:
-            line = json.loads(line)
+        for line_idx, line in enumerate(lines):
+
+            # fix some encoding issues
+            if "Ö" in line:
+                print(tt.channel, f"[{line}]")
+            line = line.replace("", "")
+
+            try:
+                line = json.loads(line)
+            except:
+                print(f"ERROR in line #{line_idx} '{line}'")
+                raise
+
             if isinstance(line, dict):
                 # file header
                 if "scraper" in line:
                     tt.timestamp = line["timestamp"]
+                    tt.channel = line["scraper"]
                     continue
 
+                # page header
                 cur_page = TeletextPage()
                 cur_page.index = line["page"]
                 cur_page.sub_index = line["sub_page"]
@@ -34,6 +62,8 @@ class Teletext:
                 index = (cur_page.index, cur_page.sub_index)
                 tt.pages[index] = cur_page
                 tt.page_index.append(index)
+
+            # page content
             else:
                 assert cur_page, f"line before page"
                 cur_page.lines.append([
