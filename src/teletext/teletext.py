@@ -17,13 +17,17 @@ class Teletext:
         return f"{self.__class__.__name__}({self.timestamp}, {self.channel}, {len(self.pages)})"
 
     @classmethod
-    def from_ndjson(cls, file: Union[str, Path, IO, List[str], bytes]) -> "Teletext":
+    def from_ndjson(
+            cls,
+            file: Union[str, Path, IO, List[str], bytes],
+            ignore_errors: bool = False,
+    ) -> "Teletext":
         if isinstance(file, (str, Path)):
             lines = Path(file).read_text().strip().splitlines()
         elif isinstance(file, list):
             lines = file
         elif isinstance(file, bytes):
-            lines = file.decode().splitlines()
+            lines = file.replace(b"\x96\xc2\x00\x0a", b"").decode().splitlines()
         else:
             content = file.read()
             if isinstance(content, bytes):
@@ -35,15 +39,12 @@ class Teletext:
         cur_page = None
         for line_idx, line in enumerate(lines):
 
-            # fix some encoding issues
-            if "Ö" in line:
-                print(tt.channel, f"[{line}]")
-            line = line.replace("", "")
-
             try:
                 line = json.loads(line)
             except:
                 print(f"ERROR in line #{line_idx} '{line}'")
+                if ignore_errors and not line.startswith("{"):
+                    continue
                 raise
 
             if isinstance(line, dict):

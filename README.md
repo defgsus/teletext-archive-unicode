@@ -88,7 +88,16 @@ The original character codes from the teletext pages are converted to
 the unicode mappings via 
 [these tables](https://en.wikipedia.org/wiki/Teletext_character_set#Graphics_character_sets).
 
+### technicals
 
+Before 2022-02-20, the ZDF recordings have an encoding problem which i couldn't 
+correctly fix afterwards. Parsing the ndjson files will actually result in 
+some json decoding errors because of a spooky sequence like `96 c2 00 0a` after
+the letter 'Ö'. Ignoring json errors and skipping those lines works. You'll just
+miss some lines in the page content. However, other stupid character sequences
+are in there as well and some lines might have more than 40 characters. 
+Also the block graphics might be expurgated. 
+ 
 
 ### related stuff
 

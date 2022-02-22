@@ -42,6 +42,6 @@ class TeletextIterator:
                 if self.channels and channel not in self.channels:
                     continue
 
-                tt = Teletext.from_ndjson(file.data)
+                tt = Teletext.from_ndjson(file.data, ignore_errors=True)
                 tt.commit_hash = commit.hash
                 yield tt
