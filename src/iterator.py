@@ -32,7 +32,6 @@ class TeletextIterator:
             )
 
         for commit in commit_iterable:
-            print(commit.hash)
             for file in commit.iter_files(snapshot_path):
                 name = file.name.split("/")[-1]
                 if not name.endswith(".ndjson"):

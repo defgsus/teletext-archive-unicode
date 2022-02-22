@@ -35,17 +35,13 @@ class SR(Scraper):
 
             page_index = new_page_index
 
-    def _is_page_different(self, page_index: int, sub_page_index: int, new_content: str) -> bool:
-        filename = self.to_filename(page_index, sub_page_index)
-        if not filename.exists():
-            return True
-
-        # see if something else than the date has changed
-
-        old_content = filename.read_text().splitlines()[1:]
-        new_content = new_content.splitlines()[1:]
-
-        return old_content != new_content
+    def compare_pages(self, old: TeletextPage, new: TeletextPage) -> bool:
+        if len(old.lines) != len(new.lines):
+            return False
+        if len(old.lines) < 1:
+            return False
+        # compare pages without the first line which includes the current date and time
+        return old.lines[1:] == new.lines[1:]
 
     def to_teletext(self, content: bs4.BeautifulSoup) -> TeletextPage:
         tt = TeletextPage()
