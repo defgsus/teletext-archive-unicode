@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Optional, TextIO, Tuple, Union, IO
+from typing import List, Optional, TextIO, Tuple, Union, IO, Dict
 
 from .page import TeletextPage
 
@@ -8,8 +8,8 @@ from .page import TeletextPage
 class Teletext:
     
     def __init__(self):
-        self.pages = {}
-        self.page_index = []
+        self.pages: Dict[Tuple[int, int], TeletextPage] = {}
+        self.page_index: List[Tuple[int, int]] = []
         self.timestamp = None
         self.channel = None
 

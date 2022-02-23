@@ -3,6 +3,7 @@ import json
 from typing import List, Optional, TextIO, Tuple, Union
 
 from ..console import ConsoleColors
+from ..words import tokenize
 from .unico import (
     G0_TO_UNICODE_MAPPING, G1_TO_UNICODE_MAPPING, G3_TO_UNICODE_MAPPING
 )
@@ -11,6 +12,9 @@ from .unico import (
 class TeletextPage:
     """
     Single page representation.
+
+    This class wraps between the encoded ndjson file format
+    and the ANSI representation. It also helps to scrape the pages.
 
     Colors:
         https://en.wikipedia.org/wiki/Videotex_character_set#C1_control_codes
@@ -42,6 +46,12 @@ class TeletextPage:
     }
 
     class Block:
+        """
+        Representation of a text block with it's attributes like
+         - foreground and background color
+         - the extended character set
+         - a teletext page link
+        """
         def __init__(
                 self,
                 text: str,
@@ -146,8 +156,7 @@ class TeletextPage:
 
     def __eq__(self, other) -> bool:
         """
-        Only compares the content,
-        not the timestamp or index
+        Only compares the content, not the timestamp or index!
         """
         if not isinstance(other, TeletextPage):
             return False
@@ -202,6 +211,18 @@ class TeletextPage:
                 print(block_str, end="", file=file)
 
             print(file=file)
+
+    def to_tokens(self, lowercase: bool = False) -> List[str]:
+        texts = []
+        for line in self.lines:
+            for block in line:
+                for c in block.text:
+                    if ord(c) < 0x1bf00 and not 0x2500 <= ord(c) < 0x2600 and not "0" <= c <= "9":
+                        texts.append(c)
+
+            texts.append(" ")
+        text = "".join(texts)
+        return tokenize(text, lowercase=lowercase)
 
     @classmethod
     def from_matrix(cls, matrix: List[List[Tuple[str, str]]]) -> "TeletextPage":
