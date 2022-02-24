@@ -2,10 +2,11 @@ import io
 import json
 from typing import List, Optional, TextIO, Tuple, Union
 
-from ..console import ConsoleColors
+from ..console import ConsoleColors as CC
 from ..words import tokenize
 from .unico import (
-    G0_TO_UNICODE_MAPPING, G1_TO_UNICODE_MAPPING, G3_TO_UNICODE_MAPPING
+    G0_TO_UNICODE_MAPPING, G1_TO_UNICODE_MAPPING, G3_TO_UNICODE_MAPPING,
+    RE_ANSI_ESCAPE
 )
 
 
@@ -24,14 +25,14 @@ class TeletextPage:
     """
     
     COLOR_CONSOLE_MAPPING = {
-        "b": ConsoleColors.BLACK,
-        "r": ConsoleColors.RED,
-        "g": ConsoleColors.GREEN,
-        "y": ConsoleColors.YELLOW,
-        "l": ConsoleColors.BLUE,
-        "m": ConsoleColors.PURPLE,
-        "c": ConsoleColors.CYAN,
-        "w": ConsoleColors.WHITE,
+        "b": CC.BLACK,
+        "r": CC.RED,
+        "g": CC.GREEN,
+        "y": CC.YELLOW,
+        "l": CC.BLUE,
+        "m": CC.PURPLE,
+        "c": CC.CYAN,
+        "w": CC.WHITE,
     }
 
     BOOL_RGB_TO_TELETEXT_MAPPING = {
@@ -121,10 +122,10 @@ class TeletextPage:
             block_str = self.text
 
             if colors:
-                block_str = ConsoleColors.escape(
+                block_str = CC.escape(
                     TeletextPage.COLOR_CONSOLE_MAPPING[self.color or "w"],
                     TeletextPage.COLOR_CONSOLE_MAPPING[self.bg_color or "b"]
-                ) + block_str + ConsoleColors.escape()
+                ) + block_str + CC.escape()
 
             return block_str
 
@@ -197,21 +198,46 @@ class TeletextPage:
                 json_line = [b.to_json() for b in line]
                 print(json.dumps(json_line, ensure_ascii=False, separators=(',', ':')), file=file)
 
-    def to_ansi(self, file: Optional[TextIO] = None, colors: bool = True) -> Optional[str]:
+    def to_ansi(self, file: Optional[TextIO] = None, colors: bool = True, border: bool = False) -> Optional[str]:
         if file is None:
             file = io.StringIO()
-            self.to_ansi(file, colors=colors)
+            self.to_ansi(file, colors=colors, border=border)
             file.seek(0)
             return file.read()
 
-        for line in self.lines:
+        if not border:
+            for line in self.lines:
+                for block in line:
+                    block_str = block.to_ansi(colors=colors)
+                    print(block_str, end="", file=file)
 
-            for block in line:
-                block_str = block.to_ansi(colors=colors)
-                print(block_str, end="", file=file)
+                print(file=file)
 
-            print(file=file)
+        else:
+            lines = [
+                "".join(block.to_ansi(colors=False) for block in line)
+                for line in self.lines
+            ]
+            width = max(0, 0, *(len(l) for l in lines))
 
+            if colors:
+                color_lines = [
+                    "".join(block.to_ansi(colors=True) for block in line)
+                    for line in self.lines
+                ]
+
+                c = CC.escape(CC.WHITE, bright=False)
+                off = CC.escape()
+                print(c + "▛" + "▀" * width + "▜" + off, file=file)
+                for c_line, line in zip(color_lines, lines):
+                    print(c + "▌" + off + c_line + " " * (width - len(line)) + c + "▐" + off, file=file)
+                print(c + "▙" + "▄" * width + "▟" + off, file=file)
+            else:
+                print("▛" + "▀" * width + "▜", file=file)
+                for line in lines:
+                    print("▌" + line + " " * (width - len(line)) + "▐", file=file)
+                print("▙" + "▄" * width + "▟", file=file)
+                
     def to_tokens(self, lowercase: bool = False) -> List[str]:
         texts = []
         for line in self.lines:

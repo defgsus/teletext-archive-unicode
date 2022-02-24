@@ -1,6 +1,8 @@
 """
 Unicode (and teletext) related stuff
 """
+import re
+
 
 _G0 = r""" !"#$%&'()*+,-./
 0123456789:;<=>?
@@ -176,3 +178,7 @@ G3_TO_UNICODE_MAPPING = {
     0x7c: 0x1fb6e,
     0x7d: 0x1fb6f,
 }
+
+
+# https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python/14693789#14693789
+RE_ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')

@@ -227,7 +227,14 @@ class Giterator:
         for branch in branches:
             yield from branch[1:]
 
-    def iter_commit_hashes(self, offset: int = 0, count: int = 0) -> Generator[dict, None, None]:
+    def iter_commit_hashes(
+            self,
+            *filenames: str,
+            offset: int = 0,
+            count: int = 0,
+            topo_order: bool = False,
+            all: bool = False,
+    ) -> Generator[dict, None, None]:
         """
         Yield **ALL** commit hashes of the repository
 
@@ -249,10 +256,20 @@ class Giterator:
         git_cmd = [
             "git", "rev-list",
             "--children",
-            "--all", "--reverse",
-            "--topo-order",
+            "--reverse",
             f"--pretty=%aI %T %P"
         ]
+        if topo_order:
+            git_cmd += ["--topo-order"]
+        if all:
+            if "--all" not in self._git_args:
+                git_cmd.append("--all")
+        else:
+            if "--branches" not in self._git_args:
+                git_cmd.append("--branches")
+
+        if filenames:
+            git_cmd += ["--"] + list(filenames)
 
         self._log(" ".join(git_cmd))
         process = subprocess.Popen(
