@@ -1,11 +1,11 @@
-# archive of german online teletexts
+# archive of (german) online teletexts
 
 Or *videotext*, as we used to call it. 
 
 [![Scraper](https://github.com/defgsus/teletext-archive-unicode/actions/workflows/scraper.yml/badge.svg)](https://github.com/defgsus/teletext-archive/actions/workflows/scraper.yml)
 
 This repo uses github actions to scrape teletext pages from 
-web sources and convert the html into easy digestible json/unicode files. 
+web sources and converts the html into easy digestible json/unicode files. 
 
 The data is stored in [docs/snapshots](docs/snapshots) in a new-line 
 delimited json file for each station. 
@@ -28,8 +28,8 @@ delimited json file for each station.
 
 ### format
 
-The files contain one json object in each line. 
-Each file starts with a simple line like this:
+Each line is one complete json object. 
+Each file starts with a simple line like this. The timestamp is UTC.
 ```json
 {"scraper":"3sat","timestamp":"2022-02-05T04:09:36"}
 ```
@@ -39,7 +39,7 @@ Then each page starts like this:
 {"page":100,"sub_page":1,"timestamp":"2022-02-05T04:09:36"}
 ```
 
-and is followed by lines of content like this
+and is followed by lines of content like this:
 ```json
 [["wb","  "],["rb","🬦🬚🬋🬋🬩🬚🬹 "],["bb","🬞🬭🬏 🬭🬭 🬻🬭                     "]]
 [["wb","  "],["rb","▐█🬱🬵🬆🬵█ "],["bb","█🬒🬎🬉🬆🬨▌█🬂 "],["rb","                    "]]
@@ -88,16 +88,35 @@ The original character codes from the teletext pages are converted to
 the unicode mappings via 
 [these tables](https://en.wikipedia.org/wiki/Teletext_character_set#Graphics_character_sets).
 
+
+### :star: view it :star:
+
+Setup a python env, install `requirements.txt` and call `python show.py`.
+
+![console screenshot](docs/img/console-screenshot.png)
+
+You can browse pages *horizontally* and *vertically*, e.g. through history.
+The snapshots are loaded from the git repo in the back. 
+
+
 ### technicals
 
-Before 2022-02-20, the ZDF recordings have an encoding problem which i couldn't 
+- Scraping is currently done about every 8 hours. I'd love to leave this
+running **forever** but need to watch the growing repository size. 
+The [alpha version](https://github.com/defgsus/teletext-archive) exploded
+in only a few weeks time.
+
+- Not all special characters are decoded for each station. Currently they
+are replaced by `?`.  
+
+- Before 2022-02-21, the ZDF recordings have an encoding problem which i couldn't 
 correctly fix afterwards. Parsing the ndjson files will actually result in 
 some json decoding errors because of a spooky sequence like `96 c2 00 0a` after
 the letter 'Ö'. Ignoring json errors and skipping those lines works. You'll just
 miss some lines in the page content. However, other stupid character sequences
 are in there as well and some lines might have more than 40 characters. 
 Also the block graphics might be expurgated. 
- 
+
 
 ### related stuff
 
@@ -117,6 +136,7 @@ Oh boy, look what else exists on the web:
   at least the charset switch
 - unrecognized chars on **NTV 218**
 - ZDF scraper report in commit message only shows *pages added*
+
 
 ## TODO other sites
     

@@ -149,7 +149,7 @@ class Viewer:
         if self.commit_index is None:
             top_index = len(self.commit_hashes) - 1
         else:
-            top_index = min(len(self.commit_hashes) - 1, max(10, self.commit_index + 5))
+            top_index = min(len(self.commit_hashes) - 1, max(9, self.commit_index + 5))
         return "\n".join(
             ("*" if self.commit_index == top_index - i else " ")
             + " " + self.commit_hashes[top_index - i]['timestamp'].replace("T", " ")
@@ -158,9 +158,10 @@ class Viewer:
 
     def help_str(self) -> str:
         help = "q = quit, m = mode, c = color\n"
-        help += "page: 0-9, up/down, right/left\n"
-        help += "history: -/+, [YYYY-]MM-DD\n"
-        help += "channels: " + ", ".join(scraper_classes) + "\n"
+        help += "page: 0-9, up/down, right/left, b = back\n"
+        help += "history: -/+, [[YYYY-]MM]-DD, YYYY\n"
+        help += "channels: " + ", ".join(sorted(scraper_classes)[:6]) + "\n"
+        help += "  " + ", ".join(sorted(scraper_classes)[6:]) + "\n"
         return help
 
     @classmethod
