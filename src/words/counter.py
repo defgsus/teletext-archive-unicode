@@ -21,7 +21,7 @@ class TokenCounter:
     def sort(self, key: Optional[Callable] = None, reverse: bool = True):
         self.tokens = self.tokens.sorted(key=key, reverse=reverse)
 
-    def freq(self, token: Hashable) -> float:
+    def freq_of(self, token: Hashable) -> float:
         return 0. if not self.num_all else self.tokens.get(token, 0.) / self.num_all
 
     def to_freq(self) -> CalcDict:
@@ -67,5 +67,5 @@ class TokenCounter:
 
     def dump(self, count: int = 50, sort_key: Optional[Callable] = None, file=None):
         for key in self.sorted_keys(key=sort_key)[:count]:
-            print(f"{key:30} {self.tokens[key]:9,} ({self.freq(key):.5f})", file=file)
+            print(f"{key:30} {self.tokens[key]:9,} ({self.freq_of(key):.5f})", file=file)
 

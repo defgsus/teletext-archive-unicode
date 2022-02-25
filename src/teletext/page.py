@@ -3,7 +3,7 @@ import json
 from typing import List, Optional, TextIO, Tuple, Union
 
 from ..console import ConsoleColors as CC
-from ..words import tokenize
+from ..words import tokenize, concat_split_words
 from .unico import (
     G0_TO_UNICODE_MAPPING, G1_TO_UNICODE_MAPPING, G3_TO_UNICODE_MAPPING,
     RE_ANSI_ESCAPE
@@ -238,7 +238,7 @@ class TeletextPage:
                     print("▌" + line + " " * (width - len(line)) + "▐", file=file)
                 print("▙" + "▄" * width + "▟", file=file)
                 
-    def to_tokens(self, lowercase: bool = False) -> List[str]:
+    def to_tokens(self, lowercase: bool = False, concat_split_words: bool = True) -> List[str]:
         texts = []
         for line in self.lines:
             for block in line:
@@ -246,8 +246,11 @@ class TeletextPage:
                     if ord(c) < 0x1bf00 and not 0x2500 <= ord(c) < 0x2600 and not "0" <= c <= "9":
                         texts.append(c)
 
-            texts.append(" ")
+            texts.append("\n")
         text = "".join(texts)
+
+        if concat_split_words:
+            text = globals()["concat_split_words"](text)
         return tokenize(text, lowercase=lowercase)
 
     @classmethod

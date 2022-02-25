@@ -36,7 +36,7 @@ class TeletextIterator:
         for commit in commit_iterable:
             for file in commit.iter_files(self.SNAPSHOT_PATH):
                 name = file.name.split("/")[-1]
-                if not name.endswith(".ndjson"):
+                if not name.endswith(".ndjson") or name.startswith("_"):
                     continue
 
                 channel = name.split(".")[0]

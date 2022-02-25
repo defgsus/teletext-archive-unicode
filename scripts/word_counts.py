@@ -1,3 +1,7 @@
+"""
+Show significant words by using
+the word-bags extracted with "extract.py"
+"""
 import math
 from pathlib import Path
 from typing import List
@@ -38,8 +42,7 @@ def dump_compare_channels(
                 diff.dump(10, reverse=True)
 
 
-def stuff():
-    channel = "wdr"
+def dump_words_per_week(channel: str = "ntv"):
     weeks = [
         f"2022-{i}" for i in range(4, 9)
     ]
@@ -65,4 +68,4 @@ def stuff():
 
 if __name__ == "__main__":
     #dump_compare_channels()
-    stuff()
+    dump_words_per_week()
