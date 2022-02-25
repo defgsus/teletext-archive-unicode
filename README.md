@@ -29,7 +29,7 @@ delimited json file for each station.
 ### format
 
 Each line is one complete json object. 
-Each file starts with a simple line like this. The timestamp is UTC.
+Each file starts with a simple line like this. All timestamps are UTC.
 ```json
 {"scraper":"3sat","timestamp":"2022-02-05T04:09:36"}
 ```
@@ -106,6 +106,21 @@ running **forever** but need to watch the growing repository size.
 The [alpha version](https://github.com/defgsus/teletext-archive) exploded
 in only a few weeks time.
 
+- To walk the historical commits look at file 
+  [docs/snapshots/zdf.ndjson](docs/snapshots/zdf.ndjson). It's been there
+  since the beginning. For example, to list all commit timestamps and hashes:
+  ```shell script
+  git log --reverse --pretty='%aI %H' -- docs/snapshots/zdf.ndjson
+  ```
+  (However, the first 50 or so commits are replayed from another repo and the 
+  timestamps do not fit the snapshot timestamps.) 
+  
+  Knowing the commit hashes, one can read the files of each commit via:
+  ```shell script
+  git archive <hash> docs/snapshots > files.tar
+  ```
+  Each file contains the actual timestamp of the snapshot. 
+  
 - Not all special characters are decoded for each station. Currently they
 are replaced by `?`.  
 
