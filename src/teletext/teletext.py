@@ -12,6 +12,7 @@ class Teletext:
         self.page_index: List[Tuple[int, int]] = []
         self.timestamp = None
         self.channel = None
+        self.commit_hash = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.timestamp}, {self.channel}, {len(self.pages)})"

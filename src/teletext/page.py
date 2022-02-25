@@ -237,8 +237,8 @@ class TeletextPage:
                 for line in lines:
                     print("▌" + line + " " * (width - len(line)) + "▐", file=file)
                 print("▙" + "▄" * width + "▟", file=file)
-                
-    def to_tokens(self, lowercase: bool = False, concat_split_words: bool = True) -> List[str]:
+
+    def to_text(self, concat_split_words: bool = True) -> str:
         texts = []
         for line in self.lines:
             for block in line:
@@ -251,6 +251,10 @@ class TeletextPage:
 
         if concat_split_words:
             text = globals()["concat_split_words"](text)
+        return text
+
+    def to_tokens(self, lowercase: bool = False, concat_split_words: bool = True) -> List[str]:
+        text = self.to_text(concat_split_words=concat_split_words)
         return tokenize(text, lowercase=lowercase)
 
     @classmethod
