@@ -23,7 +23,7 @@ class TeletextIterator:
         self.verbose = verbose
         self.git = Giterator(self.PROJECT_ROOT)
 
-    def iter_teletexts(self) -> Generator[Teletext, None, None]:
+    def iter_teletexts(self, after_hash: Optional[str] = None) -> Generator[Teletext, None, None]:
 
         commit_iterable = self.git.iter_commits(self.SNAPSHOT_PATH)
         if self.verbose:
@@ -33,19 +33,26 @@ class TeletextIterator:
                 total=self.git.num_commits(self.SNAPSHOT_PATH),
             )
 
+        yield_files = after_hash is None
+
         for commit in commit_iterable:
-            for file in commit.iter_files(self.SNAPSHOT_PATH):
-                name = file.name.split("/")[-1]
-                if not name.endswith(".ndjson") or name.startswith("_"):
-                    continue
 
-                channel = name.split(".")[0]
-                if self.channels and channel not in self.channels:
-                    continue
+            if yield_files:
+                for file in commit.iter_files(self.SNAPSHOT_PATH):
+                    name = file.name.split("/")[-1]
+                    if not name.endswith(".ndjson") or name.startswith("_"):
+                        continue
 
-                tt = Teletext.from_ndjson(file.data, ignore_errors=True)
-                tt.commit_hash = commit.hash
-                yield tt
+                    channel = name.split(".")[0]
+                    if self.channels and channel not in self.channels:
+                        continue
+
+                    tt = Teletext.from_ndjson(file.data, ignore_errors=True)
+                    tt.commit_hash = commit.hash
+                    yield tt
+
+            if after_hash and commit.hash.startswith(after_hash):
+                yield_files = True
 
     def iter_commit_timestamps(self, after_hash: Optional[str] = None) -> Generator[Tuple[str, str], None, None]:
         """

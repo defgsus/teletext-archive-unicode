@@ -1,4 +1,6 @@
-import os
+"""
+Exports all teletext pages (the character-only content) to elasticsearch
+"""
 import datetime
 from pathlib import Path
 
@@ -63,7 +65,12 @@ def export_elasticsearch(tt_iterator: TeletextIterator):
     # exporter.delete_index()
     exporter.update_index()
 
-    for tt in tt_iterator.iter_teletexts():
+    after_hash = None
+    result = exporter.search().sort("-timestamp").execute()
+    if result.documents:
+        after_hash = result.documents[0]["commit_hash"]
+
+    for tt in tt_iterator.iter_teletexts(after_hash=after_hash):
         export_items = []
         for index, page in tt.pages.items():
             export_items.append({
@@ -81,24 +88,9 @@ def export_elasticsearch(tt_iterator: TeletextIterator):
         exporter.export_list(export_items)
 
 
-def count_commits(tt_iterator: TeletextIterator):
-    date_dict = {}
-    for tt in tt_iterator.iter_teletexts():
-        for index, page in tt.pages.items():
-            key = page.timestamp[:10]
-            if key not in date_dict:
-                date_dict[key] = set()
-            date_dict[key].add(tt.commit_hash)
-
-        print("-------")
-        for key, hashes in date_dict.items():
-            print(key, len(hashes))
-
-
 def main():
     tt_iterator = TeletextIterator(verbose=True)
     export_elasticsearch(tt_iterator)
-    # count_commits(tt_iterator)
 
 
 if __name__ == "__main__":
