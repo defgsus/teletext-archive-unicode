@@ -6,6 +6,7 @@ from typing import List
 
 from src.scraper import Scraper, scraper_classes
 import src.sources
+from scripts.update_timestamps import update_timestamps
 
 
 def parse_args() -> dict:
@@ -71,6 +72,11 @@ def main(filter: List[str], verbose: bool, threads: int, error: bool):
     messages.sort()
 
     print("\n".join(messages))
+
+    try:
+        update_timestamps()
+    except Exception as e:
+        print(f"\n\n### update_timestamps failed:\n```{traceback.format_exc(limit=-4)}```")
 
 
 if __name__ == "__main__":

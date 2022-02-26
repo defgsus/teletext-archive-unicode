@@ -115,6 +115,10 @@ in only a few weeks time.
   (However, the first 50 or so commits are replayed from another repo and the 
   timestamps do not fit the snapshot timestamps.) 
   
+  A more convenient way is to read the contents of 
+  [docs/snapshots/_timestamps.ndjson](docs/snapshots/_timestamps.ndjson) 
+  which holds each snapshot commit hash and the actual snapshot timestamp.
+  
   Knowing the commit hashes, one can read the files of each commit via:
   ```shell script
   git archive <hash> docs/snapshots > files.tar

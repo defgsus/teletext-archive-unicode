@@ -47,14 +47,19 @@ class TeletextIterator:
                 tt.commit_hash = commit.hash
                 yield tt
 
-    def iter_commit_timestamps(self) -> Generator[Tuple[str, str], None, None]:
+    def iter_commit_timestamps(self, after_hash: Optional[str] = None) -> Generator[Tuple[str, str], None, None]:
         """
         Yields the timestamp and the hash of each data commit
         """
+        yield_commits = after_hash is None
         for commit in self.git.iter_commit_hashes(f"{self.SNAPSHOT_PATH}/zdf.ndjson"):
-            file = list(self.git.iter_files(commit["hash"], [f"{self.SNAPSHOT_PATH}/zdf.ndjson"]))[0]
-            header = json.loads(file.data.decode("utf-8").split("\n", 1)[0])
-            yield header["timestamp"], commit["hash"]
+            if yield_commits:
+                file = list(self.git.iter_files(commit["hash"], [f"{self.SNAPSHOT_PATH}/zdf.ndjson"]))[0]
+                header = json.loads(file.data.decode("utf-8").split("\n", 1)[0])
+                yield header["timestamp"], commit["hash"]
+
+            if after_hash and commit["hash"].startswith(after_hash):
+                yield_commits = True
 
     def get_historic_teletext(self, channel: str, commit_hash: str) -> Optional[Teletext]:
         try:

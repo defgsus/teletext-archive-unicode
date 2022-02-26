@@ -236,7 +236,7 @@ class Giterator:
             all: bool = False,
     ) -> Generator[dict, None, None]:
         """
-        Yield **ALL** commit hashes of the repository
+        Yield commit hashes of the repository
 
         :param offset: int
             Skip these number of commits before yielding.
@@ -257,7 +257,7 @@ class Giterator:
             "git", "rev-list",
             "--children",
             "--reverse",
-            f"--pretty=%aI %T %P"
+            "--pretty=%aI %T %P"
         ]
         if topo_order:
             git_cmd += ["--topo-order"]
