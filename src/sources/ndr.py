@@ -11,7 +11,35 @@ class NDR(Scraper):
 
     NAME = "ndr"
 
-    FILE_EXTENSION = "htm"
+    PAGE_CATEGORIES = {
+        100: "index",
+        108: "weather",
+        112: "news",
+        200: "sport",
+        300: "program",
+        450: "extra",
+        500: "index",
+        501: "internal",
+        520: "health",
+        530: "regional",
+        540: "cooking",
+        550: "program",
+        560: "index",
+        561: "internal",
+        565: "news",
+        570: "program",
+        590: "cooking",
+        600: "index",
+        601: "lotto",
+        610: "stocks",
+        630: "news",
+        650: "index",
+        651: "weather",
+        680: "calendar",
+        700: "traffic",
+        800: "sport",
+        870: "extra",
+    }
 
     COLOR_CLASS_MAPPING = {
         "0": "b",

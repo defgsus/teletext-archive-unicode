@@ -10,6 +10,22 @@ class WDR(Scraper):
 
     NAME = "wdr"
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        101: "news",
+        180: "weather",
+        200: "sport",
+        300: "program",
+        500: "service",
+        550: "lotto",
+        555: "traffic",
+        570: "service",
+        600: "sport",
+        681: "traffic",
+        700: "internal",
+        800: "extra",
+    }
+
     COLOR_CLASS_MAPPING = {
         "black": "b",
         "red": "r",

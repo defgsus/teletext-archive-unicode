@@ -10,6 +10,24 @@ class NTV(Scraper):
     NAME = "ntv"
     FILE_EXTENSION = "json"
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        105: "news",
+        120: "sport",
+        140: "weather",
+        150: "poll",
+        155: "commercial",
+        160: "living",
+        170: "sport",
+        200: "stocks",
+        400: "commercial",
+        410: "undefined",
+        500: "program",
+        550: "travel",
+        580: "commercial",
+        880: "internal",
+    }
+
     def iter_pages(self) -> Generator[Tuple[int, int, dict], None, None]:
         url = f"https://teletext.n-tv.de/teletext-api/100/0"
 

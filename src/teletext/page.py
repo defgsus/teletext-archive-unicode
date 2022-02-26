@@ -149,8 +149,9 @@ class TeletextPage:
         self.lines = []
         self.index = 100
         self.sub_index = 1
-        self.timestamp = None
-        self.error = None
+        self.timestamp: str = None
+        self.error: str = None
+        self.category: str = None
 
     def __str__(self):
         return f"{self.index}/{self.sub_index}({len(self.lines)} lines)"

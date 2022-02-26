@@ -125,18 +125,59 @@ class ZDFBase(Scraper):
 
 
 class ZDF(ZDFBase):
+    PAGE_CATEGORIES = {
+        100: "index",
+        112: "news",
+        170: "weather",
+        200: "sport",
+        300: "program",
+        400: "sport",
+        500: "service",
+        555: "lotto",
+        575: "traffic",
+        600: "stocks",
+        700: "service",
+        750: "undefined",  # actually is olympic games right now
+    }
+
     ABSTRACT = False
     NAME = "zdf"
     ZDF_MANDANT = "zdf"
 
 
 class ZDFInfo(ZDFBase):
+    PAGE_CATEGORIES =  {
+        100: "index",
+        112: "news",
+        170: "weather",
+        200: "sport",
+        300: "program",
+        500: "service",
+        555: "lotto",
+        575: "traffic",
+        600: "stocks",
+        700: "service",
+        750: "undefined",
+    }
     ABSTRACT = False
     NAME = "zdf-info"
     ZDF_MANDANT = "zdfinfo"
 
 
 class ZDFNeo(ZDFBase):
+    PAGE_CATEGORIES =  {
+        100: "index",
+        112: "news",
+        170: "weather",
+        200: "sport",
+        300: "program",
+        500: "service",
+        555: "lotto",
+        575: "traffic",
+        600: "stocks",
+        700: "service",
+        750: "undefined",
+    }
     ABSTRACT = False
     NAME = "zdf-neo"
     ZDF_MANDANT = "zdfneo"

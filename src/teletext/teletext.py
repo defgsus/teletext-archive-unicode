@@ -10,9 +10,9 @@ class Teletext:
     def __init__(self):
         self.pages: Dict[Tuple[int, int], TeletextPage] = {}
         self.page_index: List[Tuple[int, int]] = []
-        self.timestamp = None
-        self.channel = None
-        self.commit_hash = None
+        self.timestamp: str = None
+        self.channel: str = None
+        self.commit_hash: str = None
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.timestamp}, {self.channel}, {len(self.pages)})"
@@ -23,6 +23,9 @@ class Teletext:
             file: Union[str, Path, IO, List[str], bytes],
             ignore_errors: bool = False,
     ) -> "Teletext":
+        from ..scraper import scraper_classes
+        from .. import sources
+        
         if isinstance(file, (str, Path)):
             lines = Path(file).read_text().strip().splitlines()
         elif isinstance(file, list):
@@ -36,6 +39,7 @@ class Teletext:
             lines = content.splitlines()
 
         tt = cls()
+        scrapers = dict()
 
         cur_page = None
         for line_idx, line in enumerate(lines):
@@ -53,6 +57,8 @@ class Teletext:
                 if "scraper" in line:
                     tt.timestamp = line["timestamp"]
                     tt.channel = line["scraper"]
+                    if tt.channel not in scrapers:
+                        scrapers[tt.channel] = scraper_classes[tt.channel]()
                     continue
 
                 # page header
@@ -61,6 +67,8 @@ class Teletext:
                 cur_page.sub_index = line["sub_page"]
                 cur_page.timestamp = line["timestamp"]
                 cur_page.error = line.get("error")
+                cur_page.category = scrapers[tt.channel].get_page_category(cur_page.index, cur_page.timestamp)
+
                 index = (cur_page.index, cur_page.sub_index)
                 tt.pages[index] = cur_page
                 tt.page_index.append(index)

@@ -26,6 +26,11 @@ class Scraper:
 
     BASE_PATH: Path = Path(__file__).resolve().parent.parent / "docs" / "snapshots"
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        101: "undefined",
+    }
+
     def __init_subclass__(cls, **kwargs):
         if not cls.ABSTRACT:
             assert cls.NAME, f"Define {cls.__name__}.NAME"
@@ -69,10 +74,20 @@ class Scraper:
     def to_teletext(self, content: Any) -> Optional[TeletextPage]:
         raise NotImplementedError
 
+    def get_page_category(self, page: int, timestamp: str) -> str:
+        last_category = "undefined"
+        for num in sorted(self.PAGE_CATEGORIES):
+            if page == num:
+                return self.PAGE_CATEGORIES[num]
+            if num > page:
+                return last_category
+            last_category = self.PAGE_CATEGORIES[num]
+        return last_category
+
     def compare_pages(self, old: TeletextPage, new: TeletextPage) -> bool:
         """
         Override this to compare pages without, e.g. an imprinted timestamp.
-        New use in committing changes like this.
+        No use in committing changes like this.
         """
         return old == new
 

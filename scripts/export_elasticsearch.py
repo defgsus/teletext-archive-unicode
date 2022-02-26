@@ -26,6 +26,7 @@ class TeletextExporter(Exporter):
             "commit_hash": {"type": "keyword"},
 
             "channel": {"type": "keyword"},
+            "category": {"type": "keyword"},
             "page": {"type": "keyword"},
             "main_page": {"type": "integer"},
             "sub_page": {"type": "integer"},
@@ -70,6 +71,7 @@ def export_elasticsearch(tt_iterator: TeletextIterator):
                 "page_timestamp": page.timestamp,
                 "commit_hash": tt.commit_hash,
                 "channel": tt.channel,
+                "category": page.category,
                 "page": "%s-%s" % index,
                 "main_page": index[0],
                 "sub_page": index[1],
@@ -97,6 +99,7 @@ def main():
     tt_iterator = TeletextIterator(verbose=True)
     export_elasticsearch(tt_iterator)
     # count_commits(tt_iterator)
+
 
 if __name__ == "__main__":
     main()

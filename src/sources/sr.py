@@ -11,6 +11,23 @@ class SR(Scraper):
 
     NAME = "sr"
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        110: "news",
+        160: "weather",
+        200: "sport",
+        300: "program",
+        470: "undefined",
+        500: "service",
+        520: "lotto",
+        540: "traffic",
+        560: "culture",
+        598: "traffic",
+        600: "sport",
+        700: "undefined",
+        810: "extra",
+    }
+
     def iter_pages(self) -> Generator[Tuple[int, int, bs4.BeautifulSoup], None, None]:
 
         page_index = 100

@@ -35,6 +35,22 @@ class DreiSAT(Scraper):
         "pos": re.compile(r".*background-position:\s*(-?\d+)px\s+(-?\d+)px"),
     }
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        111: "news",
+        160: "stocks",
+        180: "undefined",
+        200: "sport",
+        280: "lotto",
+        300: "program",
+        400: "index",
+        401: "weather",
+        450: "traffic",
+        500: "culture",
+        600: "index",
+        601: "internal",
+    }
+
     def iter_pages(self) -> Generator[Tuple[int, int, Any], None, None]:
         page_index = 100
         sub_page_index = 1

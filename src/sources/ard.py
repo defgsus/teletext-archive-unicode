@@ -14,6 +14,26 @@ class ARD(Scraper):
         "bl": "l"
     }
 
+    PAGE_CATEGORIES = {
+        100: "index",
+        101: "news",
+        170: "weather",
+        200: "sport",
+        300: "program",
+        400: "culture",
+        420: "gossip",
+        440: "internal",
+        500: "sport",
+        570: "extra",
+        580: "lotto",
+        590: "undefined",
+        650: "sport",
+        700: "stocks",
+        770: "internal",
+        790: "index",
+        800: "undefined",
+    }
+
     def iter_pages(self) -> Generator[Tuple[int, int, Any], None, None]:
         page_index = 100
         while page_index < 900:
