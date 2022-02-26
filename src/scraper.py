@@ -23,6 +23,7 @@ class Scraper:
 
     # request timeout in seconds
     REQUEST_TIMEOUT: float = 10
+    REQUEST_RETRIES: int = 3
 
     BASE_PATH: Path = Path(__file__).resolve().parent.parent / "docs" / "snapshots"
 
@@ -178,7 +179,13 @@ class Scraper:
     def get_html(self, url: str, method: str = "GET", **kwargs) -> requests.Response:
         kwargs.setdefault("timeout", self.REQUEST_TIMEOUT)
         self.log("requesting", url)
-        return self.session.request(method=method, url=url, **kwargs)
+
+        for i in range(self.REQUEST_RETRIES):
+            try:
+                return self.session.request(method=method, url=url, **kwargs)
+            except requests.RequestException:
+                if i + 1 < self.REQUEST_RETRIES:
+                    raise
 
     def get_soup(
             self,
