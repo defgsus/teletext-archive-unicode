@@ -19,6 +19,7 @@ jobs:
         run: |
           python update.py -j 10 > commit-message.md
           cat commit-message.md
+          ls -la
       - name: git config user
         run: |
           curl -s -u ${GITHUB_ACTOR}:${{ secrets.GITHUB_TOKEN }} https://api.github.com/users/${GITHUB_ACTOR} > ${GITHUB_ACTOR}.json
