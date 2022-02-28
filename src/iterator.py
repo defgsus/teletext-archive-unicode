@@ -10,6 +10,9 @@ from .giterator import Giterator
 
 
 class TeletextIterator:
+    """
+    Access to Teletext instances throughout the git history
+    """
 
     PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent
     SNAPSHOT_PATH = "docs/snapshots"
@@ -47,7 +50,7 @@ class TeletextIterator:
                     if self.channels and channel not in self.channels:
                         continue
 
-                    tt = Teletext.from_ndjson(file.data, ignore_errors=True)
+                    tt = Teletext.from_ndjson(file.data)
                     tt.commit_hash = commit.hash
                     yield tt
 
@@ -74,7 +77,7 @@ class TeletextIterator:
         except tarfile.ReadError:
             return
         if files:
-            tt = Teletext.from_ndjson(files[0].data, ignore_errors=True)
+            tt = Teletext.from_ndjson(files[0].data)
             tt.commit_hash = commit_hash
             return tt
 

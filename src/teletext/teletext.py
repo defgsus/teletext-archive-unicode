@@ -21,7 +21,7 @@ class Teletext:
     def from_ndjson(
             cls,
             file: Union[str, Path, IO, List[str], bytes],
-            ignore_errors: bool = False,
+            ignore_errors: bool = True,
     ) -> "Teletext":
         from ..scraper import scraper_classes
         from .. import sources

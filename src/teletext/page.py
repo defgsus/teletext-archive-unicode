@@ -239,7 +239,28 @@ class TeletextPage:
                     print("▌" + line + " " * (width - len(line)) + "▐", file=file)
                 print("▙" + "▄" * width + "▟", file=file)
 
+    def to_html(self, css: bool = False, file: Optional[TextIO] = None) -> Optional[str]:
+        from .html_renderer import TeletextHtmlRenderer
+        if file is None:
+            file = io.StringIO()
+            self.to_html(css=css, file=file)
+            file.seek(0)
+            return file.read()
+
+        renderer = TeletextHtmlRenderer()
+        if css:
+            print("""<style>""", file=file)
+            renderer.css(file=file)
+            print("""</style>""", file=file)
+        renderer.render(self, file=file)
+
     def to_text(self, concat_split_words: bool = True) -> str:
+        """
+        Returns everything that is not graphics or numbers.
+
+        Also concats bro-
+        ken lines together.
+        """
         texts = []
         for line in self.lines:
             for block in line:
@@ -323,7 +344,7 @@ class TeletextPage:
         """
         Merge blocks of equal attributes together
 
-        Returns new list but blocks may have changed!
+        Returns new list but the Block instances may have changed!
         """
         simple_line = []
         prev_block = None
