@@ -281,10 +281,32 @@ class Viewer:
 
     def search(self, query: str):
         from elastipy import Search
-        result = (
+
+        date = None
+        if query and query[0].isnumeric():
+            query = query.split()
+            date_str = query[0]
+            query = " ".join(query[1:])
+            for date_fmt in ("%Y-%m-%d", "%m-%d"):
+                try:
+                    date = datetime.datetime.strptime(date_str, date_fmt).date()
+                    if date.year < 2022:
+                        date = date.replace(year=2022)
+                    break
+                except ValueError:
+                    pass
+            if not date:
+                print(f"Invalid date '{date_str}' in search")
+                return
+
+        s = (
             Search("teletext-archive")
             .match("text", query, operator="and")
-            .size(1000)
+        )
+        if date:
+            s = s.range("timestamp", gte=date, lte=date)
+        result = (
+            s.size(1000)
             .sort("-timestamp")
             .execute()
         )
