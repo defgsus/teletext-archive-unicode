@@ -3,6 +3,7 @@ import sys
 import json
 import glob
 import datetime
+import time
 from pathlib import Path
 from typing import Generator, Tuple, Union, Optional, Any
 
@@ -22,7 +23,7 @@ class Scraper:
     ABSTRACT: bool = False
 
     # request timeout in seconds
-    REQUEST_TIMEOUT: float = 10
+    REQUEST_TIMEOUT: float = 20
     REQUEST_RETRIES: int = 3
 
     BASE_PATH: Path = Path(__file__).resolve().parent.parent / "docs" / "snapshots"
@@ -186,6 +187,7 @@ class Scraper:
             except requests.RequestException:
                 if i + 1 < self.REQUEST_RETRIES:
                     raise
+                time.sleep(3)
 
     def get_soup(
             self,
