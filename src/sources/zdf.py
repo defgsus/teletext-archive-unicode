@@ -4,6 +4,7 @@ import datetime
 from typing import Dict, Generator, Tuple, Union
 
 import pytz
+import bs4
 
 from ..scraper import Scraper
 from ..teletext import Teletext, TeletextPage
@@ -39,8 +40,8 @@ class ZDFBase(Scraper):
             url = f"https://teletext.zdf.de/php/options.php?mandant={self.ZDF_MANDANT}&site={page_index}"
             response = self.get_html(url)
 
-            num_sub_pages, date = response.text.split(",")
-            num_sub_pages = int(num_sub_pages) + 1
+            date = response.text
+            num_sub_pages = 1
             is_empty_page = date == "-1"
 
             if is_empty_page:
@@ -49,7 +50,8 @@ class ZDFBase(Scraper):
             date = datetime.datetime.strptime(date[:19], "%Y-%m-%dT%H:%M:%S")
             date = self.TIMEZONE.localize(date).astimezone(pytz.utc).isoformat()
 
-            for sub_page_index in range(num_sub_pages):
+            sub_page_index = 0
+            while sub_page_index < num_sub_pages:
 
                 # keep the pages that don't have changed (according to published timestamp)
                 #   and avoid downloading them because the pages include the current time
@@ -57,6 +59,7 @@ class ZDFBase(Scraper):
                 if previous_page:
                     if date <= previous_page.timestamp:
                         yield page_index, sub_page_index + 1, True
+                        sub_page_index += 1
                         continue
 
                 page_name = f"{page_index}"
@@ -68,7 +71,14 @@ class ZDFBase(Scraper):
 
                 if response.status_code == 200:
                     text = response.content.decode("utf-8")
-                    yield page_index, sub_page_index + 1, text
+                    soup = self.to_soup(text)
+                    if sub_page_index == 0:
+                        body = soup.find("body")
+                        num_sub_pages = int(body.attrs["subpages"])
+                        
+                    yield page_index, sub_page_index + 1, soup
+
+                sub_page_index += 1
 
     def compare_pages(self, old: TeletextPage, new: TeletextPage) -> bool:
         if len(old.lines) != len(new.lines):
@@ -78,12 +88,16 @@ class ZDFBase(Scraper):
         # compare pages without the first line which includes the current date and time
         return old.lines[1:] == new.lines[1:]
 
-    def to_teletext(self, content: str) -> TeletextPage:
-        # fix older encoding errors
-        for wrong, correct in self.ENCODING_FIX_MAPPING.items():
-            content = content.replace(wrong, correct)
+    def to_teletext(self, content: Union[str, bs4.BeautifulSoup]) -> TeletextPage:
+        if isinstance(content, str):
+            # fix older encoding errors
+            for wrong, correct in self.ENCODING_FIX_MAPPING.items():
+                content = content.replace(wrong, correct)
 
-        soup = self.to_soup(content)
+            soup = self.to_soup(content)
+        else:
+            soup = content
+
         tt = TeletextPage()
         for row in soup.find("div", {"id": "content"}).find_all("div", {"class": "row"}):
             tt.new_line()
