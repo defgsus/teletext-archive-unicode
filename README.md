@@ -26,6 +26,22 @@ delimited json file for each station.
 | ✔ [ZDFneo](docs/snapshots/zdf-neo)    | 2022-01-27 | html | https://teletext.zdf.de/teletext/zdfneo/
 
 
+### :star: view it :star:
+
+Setup a python env, install `requirements.txt` and call `python show.py`.
+
+![console screenshot](docs/img/console-screenshot.png)
+
+You can browse pages *horizontally* and *vertically*, 
+meaning **through history**.
+The snapshots are loaded from the git repo in the back. There are about
+3 snapshots per day.
+
+![animated weather](docs/img/weather.gif) ![animated soccer table](docs/img/sports.gif)
+
+![animated stocks](docs/img/stocks.gif) ![animated air quality table](docs/img/air-quality.gif)
+
+
 ### format
 
 Each line is one complete json object. 
@@ -87,16 +103,6 @@ starting at `0x1bf00`. If not, you can install a font like
 The original character codes from the teletext pages are converted to 
 the unicode mappings via 
 [these tables](https://en.wikipedia.org/wiki/Teletext_character_set#Graphics_character_sets).
-
-
-### :star: view it :star:
-
-Setup a python env, install `requirements.txt` and call `python show.py`.
-
-![console screenshot](docs/img/console-screenshot.png)
-
-You can browse pages *horizontally* and *vertically*, e.g. through history.
-The snapshots are loaded from the git repo in the back. 
 
 
 ### technicals
