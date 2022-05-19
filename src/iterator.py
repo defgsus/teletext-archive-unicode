@@ -26,7 +26,10 @@ class TeletextIterator:
         self.verbose = verbose
         self.git = Giterator(self.PROJECT_ROOT)
 
-    def iter_teletexts(self, after_hash: Optional[str] = None) -> Generator[Teletext, None, None]:
+    def iter_teletexts(
+            self,
+            after_hash: Optional[str] = None,
+    ) -> Generator[Teletext, None, None]:
 
         commit_iterable = self.git.iter_commits(self.SNAPSHOT_PATH)
         if self.verbose:

@@ -254,6 +254,11 @@ class TeletextPage:
             print("""</style>""", file=file)
         renderer.render(self, file=file)
 
+    def to_image(self):
+        from .image_renderer import TeletextImageRenderer
+        renderer = TeletextImageRenderer()
+        return renderer.render(self)
+
     def to_text(self, concat_split_words: bool = True) -> str:
         """
         Returns everything that is not graphics or numbers.
