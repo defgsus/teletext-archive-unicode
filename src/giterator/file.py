@@ -1,7 +1,8 @@
 import tarfile
-from typing import Dict
+from typing import Dict, Union, Optional
 from io import BytesIO
-
+import json
+import datetime
 
 class File:
     """
@@ -30,6 +31,10 @@ class File:
         return self._tarinfo.mtime
 
     @property
+    def dt(self) -> datetime.datetime:
+        return datetime.datetime.fromtimestamp(self.mtime)
+
+    @property
     def data(self) -> bytes:
         if self._data is None:
             if self._tarinfo.sparse is not None:
@@ -42,6 +47,17 @@ class File:
                 self._data = self._buffer.read(self._tarinfo.size)
 
         return self._data
+
+    def text(self, encoding: Optional[str] = None, errors: Optional[str] = None) -> str:
+        kwargs = {}
+        if encoding:
+            kwargs["encoding"] = encoding
+        if errors:
+            kwargs["errors"] = errors
+        return self.data.decode(*kwargs)
+
+    def json(self, encoding: Optional[str] = None) -> Union[list, dict]:
+        return json.loads(self.text(encoding=encoding))
 
     def to_dict(self) -> dict:
         return {
