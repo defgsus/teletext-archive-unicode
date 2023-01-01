@@ -3,6 +3,7 @@
 Or *videotext*, as we used to call it. 
 
 [![Scraper](https://github.com/defgsus/teletext-archive-unicode/actions/workflows/scraper.yml/badge.svg)](https://github.com/defgsus/teletext-archive/actions/workflows/scraper.yml)
+(turned off, follow-up data is in [teletext-archive-2023](https://github.com/defgsus/teletext-archive-2023))
 
 This repo uses github actions to scrape teletext pages from 
 web sources and converts the html into easy digestible json/unicode files. 
